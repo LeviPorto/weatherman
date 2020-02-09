@@ -4,6 +4,7 @@ import com.levi.weatherman.config.RestTemplateConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -19,6 +20,8 @@ public class NasaRestTemplate {
     private final String FEED_TYPE_PARAMETER = "feedtype";
     private final String VER_PARAMETER = "api_key";
 
+    public static final String INSIGHT_WEATHER_URL = "insight_weather/";
+
     @Value("${nasa-api.api-version}")
     public String VER_PARAMETER_VALUE;
 
@@ -27,8 +30,6 @@ public class NasaRestTemplate {
 
     @Value("${nasa-api.api-key}")
     public String API_KEY_PARAMETER_VALUE;
-
-    public static final String INSIGHT_WEATHER_URL = "insight_weather/";
 
     private RestTemplate restTemplate;
     private RestTemplateConfig restTemplateConfig;

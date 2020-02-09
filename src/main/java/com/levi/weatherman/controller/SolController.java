@@ -19,9 +19,9 @@ public class SolController {
     }
 
     @GetMapping("/nasa/temperature")
-    public List<SolTemperatureDTO> findTemperatureBySol(@RequestParam(value = "SOL", required = false) String Sol)
+    public List<SolTemperatureDTO> findTemperatureBySol(@RequestParam(value = "SOL", required = false) String sol)
             throws SolDoesNotExistException {
-        return service.findTemperaturesBySol(Sol);
+        return service.findTemperaturesBySol(sol);
     }
 
 }

@@ -1,4 +1,11 @@
-nasa-api:
-  api-key: DEMO_KEY
-  api-version: 1.0
-  api-feed-type: json
+spring:
+  application:
+    name: weatherman
+server:
+  port: ${PORT:8080}
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka/}
+  instance:
+    preferIpAddress: true

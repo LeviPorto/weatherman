@@ -7,7 +7,13 @@ import lombok.Data;
 @Builder
 public class SolTemperatureDTO {
 
-    private String Sol;
+    private String sol;
     private Double averageTemperature;
+
+    @Override
+    public boolean equals(Object object) {
+        SolTemperatureDTO solTemperature = (SolTemperatureDTO) object;
+        return this.averageTemperature.equals(solTemperature.averageTemperature) && this.sol.equals(solTemperature.sol);
+    }
 
 }

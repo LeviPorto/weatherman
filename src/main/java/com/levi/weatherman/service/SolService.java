@@ -14,12 +14,14 @@ import java.util.stream.Collectors;
 @Service
 public class SolService {
 
+    public static final String SOL_KEYS_PARAMETER = "sol_keys";
+
     private NasaRestTemplate nasaRestTemplate;
-    private SolExtractor solExtractor;
+    private SolExtractor extractor;
 
     public SolService(NasaRestTemplate nasaRestTemplate, SolExtractor solExtractor) {
         this.nasaRestTemplate = nasaRestTemplate;
-        this.solExtractor = solExtractor;
+        this.extractor = solExtractor;
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -27,29 +29,29 @@ public class SolService {
         HttpEntity<LinkedHashMap> response = nasaRestTemplate.getSolsInformationFromNasa();
         LinkedHashMap<String, Object> body = response.getBody();
         if(!StringUtils.isEmpty(sol)) {
-            return getSpecificSolIfExist(sol, body);
+            return getSpecificSolTemperatureIfExist(sol, body);
         } else {
             return getAllAvailableSolsTemperature(body);
         }
     }
 
-    private List<SolTemperatureDTO> getSpecificSolIfExist(String sol, LinkedHashMap<String, Object> body) {
+    private List<SolTemperatureDTO> getSpecificSolTemperatureIfExist(String sol, LinkedHashMap<String, Object> body) {
         if(Objects.requireNonNull(body).containsKey(sol)) {
-            return Collections.singletonList(constructSolTemperatureDTO(body, sol));
+            return Collections.singletonList(constructSolTemperature(body, sol));
         } else {
-            throw new SolDoesNotExistException("This SOL is not available more");
+            throw new SolDoesNotExistException();
         }
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private List<SolTemperatureDTO> getAllAvailableSolsTemperature(LinkedHashMap<String, Object> body) {
-        ArrayList<Object> availableSols = (ArrayList) Objects.requireNonNull(body).get("sol_keys");
-        return availableSols.stream().map(object -> constructSolTemperatureDTO(body, (String) object)).collect(Collectors.toList());
+        ArrayList<Object> availableSols = (ArrayList) Objects.requireNonNull(body).get(SOL_KEYS_PARAMETER);
+        return availableSols.stream().map(sol -> constructSolTemperature(body, (String) sol)).collect(Collectors.toList());
     }
 
-    private SolTemperatureDTO constructSolTemperatureDTO(LinkedHashMap<String, Object> body, String object) {
-        return SolTemperatureDTO.builder().Sol(object)
-                .averageTemperature(solExtractor.extractSol(body, object).getAtDTO().getAv()).build();
+    private SolTemperatureDTO constructSolTemperature(LinkedHashMap<String, Object> body, String sol) {
+        return SolTemperatureDTO.builder().sol(sol)
+                .averageTemperature(extractor.extractSol(body, sol).getAtDTO().getAv()).build();
     }
 
 
