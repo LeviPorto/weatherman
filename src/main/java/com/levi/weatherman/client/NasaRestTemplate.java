@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.LinkedHashMap;
+
 @Component
 public class NasaRestTemplate {
 
@@ -17,13 +19,13 @@ public class NasaRestTemplate {
     private final String FEED_TYPE_PARAMETER = "feedtype";
     private final String VER_PARAMETER = "api_key";
 
-    @Value("nasa-api.api-version")
+    @Value("${nasa-api.api-version}")
     public String VER_PARAMETER_VALUE;
 
-    @Value("nasa-api.feed-type")
+    @Value("${nasa-api.api-feed-type}")
     public String FEED_TYPE_PARAMETER_VALUE;
 
-    @Value("nasa-api.api-key")
+    @Value("${nasa-api.api-key}")
     public String API_KEY_PARAMETER_VALUE;
 
     public static final String INSIGHT_WEATHER_URL = "insight_weather/";
@@ -43,9 +45,10 @@ public class NasaRestTemplate {
                 .queryParam(VER_PARAMETER, VER_PARAMETER_VALUE);
     }
 
-    public HttpEntity<Object> getSolsInformationFromNasa() {
+    @SuppressWarnings("rawtypes")
+    public HttpEntity<LinkedHashMap> getSolsInformationFromNasa() {
         return restTemplate.exchange(constructNasaBaseURL(INSIGHT_WEATHER_URL).toUriString()
-                , HttpMethod.GET, restTemplateConfig.getDefaultHttpEntity(), Object.class);
+                , HttpMethod.GET, restTemplateConfig.getDefaultHttpEntity(), LinkedHashMap.class);
     }
 
 }
