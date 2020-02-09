@@ -1,5 +1,6 @@
 package com.levi.weatherman.service;
 
+import com.levi.weatherman.WeathermanApplication;
 import com.levi.weatherman.client.NasaRestTemplate;
 import com.levi.weatherman.dto.AtDTO;
 import com.levi.weatherman.dto.SolDTO;
@@ -22,8 +23,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.util.*;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest
-@ActiveProfiles("test")
+@SpringBootTest(classes = WeathermanApplication.class)
 public class SolServiceTest {
 
     @InjectMocks
@@ -35,12 +35,23 @@ public class SolServiceTest {
     @Mock
     private SolExtractor extractor;
 
+    public static final String JSON_PARAMETER_AT = "AT";
+    public static final String JSON_PARAMETER_AV = "av";
+    public static final String JSON_PARAMETER_SOL_KEYS = "sol_keys";
+
+    public static final double JSON_PARAMETER_FIRST_VALUE_AV = 20.0;
+    public static final double JSON_PARAMETER_SECOND_VALUE_AV = 30.0;
+
+    public static final String FIRST_SOL = "420";
+    public static final String SECOND_SOL = "421";
+    public static final String INVALID_SOL = "422";
+
     @Before
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void set_up() {
         BDDMockito.given(nasaRestTemplate.getSolsInformationFromNasa()).willReturn(new ResponseEntity(givenSolsInformationFromNasa(), HttpStatus.OK));
-        BDDMockito.given(extractor.extractSol(givenSolsInformationFromNasa(), "420")).willReturn(givenFirstSol());
-        BDDMockito.given(extractor.extractSol(givenSolsInformationFromNasa(), "421")).willReturn( givenSecondSol());
+        BDDMockito.given(extractor.extractSol(givenSolsInformationFromNasa(), FIRST_SOL)).willReturn(givenFirstSol());
+        BDDMockito.given(extractor.extractSol(givenSolsInformationFromNasa(), SECOND_SOL)).willReturn( givenSecondSol());
     }
 
     @Test
@@ -50,12 +61,12 @@ public class SolServiceTest {
 
     @Test(expected = SolDoesNotExistException.class)
     public void it_should_return_exception_if_sent_sol_is_not_more_available() {
-        Assert.assertEquals(service.findTemperaturesBySol("422"), givenSolsTemperature());
+        Assert.assertEquals(service.findTemperaturesBySol(INVALID_SOL), givenSolsTemperature());
     }
 
     @Test
     public void it_should_return_specific_sol_from_nasa() {
-        Assert.assertEquals(service.findTemperaturesBySol("420"), givenSolTemperature());
+        Assert.assertEquals(service.findTemperaturesBySol(FIRST_SOL), givenSolTemperature());
     }
 
     private LinkedHashMap<String, Object> givenSolsInformationFromNasa() {
@@ -65,22 +76,22 @@ public class SolServiceTest {
         LinkedHashMap<String, Double> firstAverageTemperature = new LinkedHashMap<>();
         LinkedHashMap<String, Double> secondAverageTemperature = new LinkedHashMap<>();
         ArrayList<String> solKeys = new ArrayList<>();
-        solKeys.add("420");
-        solKeys.add("421");
-        firstAverageTemperature.put("av", 20.0);
-        secondAverageTemperature.put("av", 30.0);
-        firstSol.put("AT", firstAverageTemperature);
-        secondSol.put("AT", secondAverageTemperature);
-        body.put("420", firstSol);
-        body.put("421", secondSol);
-        body.put("sol_keys", solKeys);
+        solKeys.add(FIRST_SOL);
+        solKeys.add(SECOND_SOL);
+        firstAverageTemperature.put(JSON_PARAMETER_AV, JSON_PARAMETER_FIRST_VALUE_AV);
+        secondAverageTemperature.put(JSON_PARAMETER_AV, JSON_PARAMETER_SECOND_VALUE_AV);
+        firstSol.put(JSON_PARAMETER_AT, firstAverageTemperature);
+        secondSol.put(JSON_PARAMETER_AT, secondAverageTemperature);
+        body.put(FIRST_SOL, firstSol);
+        body.put(SECOND_SOL, secondSol);
+        body.put(JSON_PARAMETER_SOL_KEYS, solKeys);
         return body;
     }
 
     public SolDTO givenFirstSol() {
         SolDTO sol = new SolDTO();
         AtDTO at = new AtDTO();
-        at.setAv(20.0);
+        at.setAv(JSON_PARAMETER_FIRST_VALUE_AV);
         sol.setAtDTO(at);
         return sol;
     }
@@ -88,18 +99,19 @@ public class SolServiceTest {
     public SolDTO givenSecondSol() {
         SolDTO sol = new SolDTO();
         AtDTO at = new AtDTO();
-        at.setAv(30.0);
+        at.setAv(JSON_PARAMETER_SECOND_VALUE_AV);
         sol.setAtDTO(at);
         return sol;
     }
 
     public List<SolTemperatureDTO> givenSolsTemperature() {
-        return Arrays.asList(SolTemperatureDTO.builder().sol("420").averageTemperature(20.0).build(),
-                SolTemperatureDTO.builder().sol("421").averageTemperature(30.0).build());
+        return Arrays.asList(SolTemperatureDTO.builder().sol(FIRST_SOL).averageTemperature(JSON_PARAMETER_FIRST_VALUE_AV).build(),
+                SolTemperatureDTO.builder().sol(SECOND_SOL).averageTemperature(JSON_PARAMETER_SECOND_VALUE_AV).build());
     }
 
     public List<SolTemperatureDTO> givenSolTemperature() {
-        return Collections.singletonList(SolTemperatureDTO.builder().sol("420").averageTemperature(20.0).build());
+        return Collections.singletonList(SolTemperatureDTO.builder()
+                .sol(FIRST_SOL).averageTemperature(JSON_PARAMETER_FIRST_VALUE_AV).build());
     }
 
 }
